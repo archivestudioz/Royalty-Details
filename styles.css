@@ -416,6 +416,93 @@ p { margin: 0 0 16px; color: var(--muted); }
   color: var(--muted);
 }
 
+/* ---------- Reviews / Marquee ---------- */
+.reviews { background: var(--bg); border-top: 1px solid var(--line); padding-bottom: 60px; }
+.marquee {
+  width: 100%;
+  overflow: hidden;
+  padding: 8px 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+.marquee-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  animation: marquee-scroll 60s linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.review-card {
+  flex: 0 0 360px;
+  background: linear-gradient(180deg, var(--bg-3) 0%, var(--bg-2) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.review-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-4px);
+}
+.review-stars {
+  color: var(--gold);
+  font-size: 18px;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+.review-quote {
+  font-size: 15px;
+  color: #e0e0e0;
+  line-height: 1.6;
+  margin: 0;
+  flex: 1;
+}
+.review-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.review-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 2px;
+}
+.review-date {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+.review-google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  color: #4285f4;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.reviews-footer {
+  text-align: center;
+  margin-top: 48px;
+}
+
 /* ---------- FAQ ---------- */
 .faq { background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .faq-list {
@@ -768,4 +855,6 @@ p { margin: 0 0 16px; color: var(--muted); }
   .areas-grid { grid-template-columns: 1fr; gap: 16px; }
   .faq-item summary { padding: 18px 20px; padding-right: 48px; font-size: 15px; }
   .faq-item p { padding: 0 20px 18px; font-size: 14px; }
+  .review-card { flex-basis: 280px; padding: 22px; }
+  .marquee-track { animation-duration: 45s; }
 }

@@ -36,6 +36,17 @@ const io = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
+// Reviews marquee — duplicate cards for seamless infinite loop
+const reviewsTrack = document.getElementById('reviewsTrack');
+if (reviewsTrack) {
+  const cards = Array.from(reviewsTrack.children);
+  cards.forEach(card => {
+    const clone = card.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    reviewsTrack.appendChild(clone);
+  });
+}
+
 // Contact form (front-end only — wire up to a real backend later)
 const form = document.getElementById('contactForm');
 const note = document.getElementById('formNote');
