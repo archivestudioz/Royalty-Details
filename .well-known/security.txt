@@ -1,0 +1,5 @@
+Contact: mailto:info@royaltydetails.com
+Contact: tel:+1-551-340-7923
+Expires: 2027-04-24T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://royaltydetails.com/.well-known/security.txt
