@@ -1,7 +1,8 @@
-import { UserButton } from "@clerk/nextjs";
 import { db } from "@/lib/db";
 import { submissions } from "@/lib/schema";
 import { desc } from "drizzle-orm";
+import { signOut } from "../actions/auth";
+import { readSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ function formatDate(d: Date) {
 }
 
 export default async function AdminPage() {
+  const session = await readSession();
   const rows = await db.select().from(submissions).orderBy(desc(submissions.createdAt)).limit(200);
 
   return (
@@ -20,9 +22,15 @@ export default async function AdminPage() {
       <div className="header">
         <div>
           <h1>Royalty Details — Submissions</h1>
-          <div className="muted" style={{ fontSize: 13 }}>{rows.length} most recent</div>
+          <div className="muted" style={{ fontSize: 13 }}>
+            {rows.length} most recent · signed in as {session?.email}
+          </div>
         </div>
-        <UserButton afterSignOutUrl="/sign-in" />
+        <form action={signOut}>
+          <button type="submit" className="btn" style={{ background: "transparent", color: "var(--gold)", border: "1px solid var(--border)" }}>
+            Sign out
+          </button>
+        </form>
       </div>
 
       {rows.length === 0 ? (

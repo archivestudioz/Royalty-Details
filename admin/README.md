@@ -1,11 +1,11 @@
 # Royalty Details — Admin Backend
 
-Next.js (App Router) backend for the Royalty Details site. Receives contact form submissions and exposes a sign-in protected dashboard for staff to review them.
+Next.js (App Router) backend for the Royalty Details site. Receives contact form submissions and exposes a password-protected dashboard for staff to review them.
 
 ## Stack
 
 - Next.js 16 (App Router, Fluid Compute)
-- Clerk — authentication
+- Email + password auth (bcrypt hashing, signed JWT cookie via `jose`) — no third-party auth provider
 - Neon Postgres (via Vercel Marketplace) — storage
 - Drizzle ORM — schema + queries
 
@@ -15,24 +15,42 @@ Next.js (App Router) backend for the Royalty Details site. Receives contact form
 cd admin
 npm install
 cp .env.example .env.local
-# Fill in DATABASE_URL, Clerk keys, ALLOWED_ORIGIN
-npm run db:push   # creates the submissions table in Neon
-npm run dev       # http://localhost:3000
+# Edit .env.local and set DATABASE_URL, SESSION_SECRET, ALLOWED_ORIGIN
+npm run db:push                                            # create tables in Neon
+npm run user:create -- --email=you@example.com --password='YourStrongPass'
+npm run dev                                                # http://localhost:3000
 ```
 
-Sign up at `/sign-in` (Clerk dashboard controls who is allowed). Anyone you invite via Clerk can view `/admin`.
+Then visit `http://localhost:3000/sign-in` and log in with the credentials you just created.
+
+## Generating SESSION_SECRET
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+```
+
+Paste the output into `.env.local` as `SESSION_SECRET=...`.
+
+## Creating accounts
+
+Each person who needs access gets their own account. Run for each user:
+
+```bash
+npm run user:create -- --email=staff@example.com --password='StrongPass123'
+```
+
+Re-running with an existing email updates that user's password.
 
 ## Deploy on Vercel
 
 ```bash
 vercel link
 vercel integration add neon          # provisions DATABASE_URL
-# Add Clerk keys + ALLOWED_ORIGIN in Vercel dashboard or via:
-vercel env add NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-vercel env add CLERK_SECRET_KEY
+vercel env add SESSION_SECRET        # paste the random string
 vercel env add ALLOWED_ORIGIN        # e.g. https://royaltydetails.com
 vercel env pull .env.local --yes
 npm run db:push
+npm run user:create -- --email=...   # creates the user against the prod DB
 vercel deploy --prod
 ```
 
@@ -41,9 +59,8 @@ vercel deploy --prod
 | Var | Notes |
 |-----|-------|
 | `DATABASE_URL` | Neon Postgres connection string (auto-set by Marketplace integration) |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | From Clerk dashboard |
-| `CLERK_SECRET_KEY` | From Clerk dashboard |
-| `ALLOWED_ORIGIN` | Comma-separated list of origins allowed to POST to `/api/contact` (the static site's domain) |
+| `SESSION_SECRET` | 32+ random bytes; signs the auth cookie |
+| `ALLOWED_ORIGIN` | Comma-separated origins allowed to POST to `/api/contact` (the static site's domain) |
 
 ## Wiring the static site
 
@@ -54,10 +71,10 @@ The static site's `script.js` posts to `/api/contact` on the same origin by defa
 <script src="script.js" defer></script>
 ```
 
-Make sure that domain is listed in `ALLOWED_ORIGIN` on the admin deployment.
+Add that domain to `ALLOWED_ORIGIN` on the admin deployment.
 
 ## Routes
 
 - `POST /api/contact` — accepts `{ name, email, phone, vehicle?, service?, message? }`. Public, CORS-gated by `ALLOWED_ORIGIN`.
+- `/sign-in` — email + password form.
 - `/admin` — auth-protected dashboard (most recent 200 submissions).
-- `/sign-in` — Clerk sign-in.
