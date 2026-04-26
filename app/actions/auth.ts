@@ -32,5 +32,5 @@ export async function signIn(formData: FormData) {
 
 export async function signOut() {
   await destroySession();
-  redirect("/sign-in");
+  redirect("/");
 }
