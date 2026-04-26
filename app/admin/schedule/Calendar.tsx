@@ -11,8 +11,7 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
-  pointerWithin,
-  rectIntersection,
+  MeasuringStrategy,
   type CollisionDetection,
 } from "@dnd-kit/core";
 import Link from "next/link";
@@ -77,12 +76,22 @@ export function Calendar({
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 8 } }),
   );
 
-  // Always drop on the slot under the pointer; fall back to rect intersection
-  // so a dropped card never "stalls" outside any slot.
-  const collisionDetection: CollisionDetection = (args) => {
-    const pointer = pointerWithin(args);
-    if (pointer.length > 0) return pointer;
-    return rectIntersection(args);
+  // Strict pointer-only collision: the slot under the cursor wins, no
+  // fallback to rect math. We re-read each droppable's live DOM rect on
+  // every check so layout shifts (scroll, card removal, etc.) can't make
+  // the cached rects stale.
+  const collisionDetection: CollisionDetection = ({ droppableContainers, pointerCoordinates }) => {
+    if (!pointerCoordinates) return [];
+    const { x, y } = pointerCoordinates;
+    for (const droppable of droppableContainers) {
+      const node = droppable.node.current;
+      if (!node) continue;
+      const r = node.getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+        return [{ id: droppable.id, data: { droppableContainer: droppable, value: 0 } }];
+      }
+    }
+    return [];
   };
 
   const bookingsBySlot = useMemo(() => {
@@ -155,6 +164,7 @@ export function Calendar({
     <DndContext
       sensors={sensors}
       collisionDetection={collisionDetection}
+      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
       onDragStart={(e) => {
         const id = String(e.active.id);
         const label = id.startsWith("lead:")
