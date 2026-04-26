@@ -136,7 +136,7 @@ p { margin: 0 0 16px; color: var(--muted); }
   height: var(--header-h);
 }
 .nav-left { justify-self: start; margin-left: -120px; }
-.nav-right { justify-self: end; }
+.nav-right { justify-self: end; margin-right: -120px; }
 .nav-row > .logo { justify-self: center; }
 .logo {
   font-family: 'Inter', sans-serif;
