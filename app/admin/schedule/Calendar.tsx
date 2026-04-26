@@ -344,11 +344,34 @@ function Slot({
         borderLeft: dayIdx === 0 ? "1px solid var(--border)" : "none",
         minHeight: 64,
         padding: 4,
-        background: isOver ? "rgba(200,169,106,0.18)" : "transparent",
-        transition: "background 0.12s ease",
+        background: isOver ? "rgba(200,169,106,0.5)" : "transparent",
+        boxShadow: isOver ? "inset 0 0 0 2px var(--gold)" : "none",
+        transition: "background 0.08s ease, box-shadow 0.08s ease",
         position: "relative",
       }}
     >
+      {isOver ? (
+        <div
+          style={{
+            position: "absolute",
+            top: 4,
+            left: 4,
+            right: 4,
+            fontSize: 10,
+            color: "#0b0b0c",
+            background: "var(--gold)",
+            padding: "2px 6px",
+            borderRadius: 3,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            fontWeight: 700,
+            pointerEvents: "none",
+            zIndex: 2,
+          }}
+        >
+          Drop here · {fmtHour(hour)}
+        </div>
+      ) : null}
       {items.map((b) => <BookingCard key={b.id} b={b} />)}
     </div>
   );
