@@ -66,7 +66,13 @@ export function Calendar({
   bookings: BookingDTO[];
   unscheduled: LeadDTO[];
 }) {
-  const weekStart = useMemo(() => new Date(weekStartISO), [weekStartISO]);
+  // The server sends us a UTC instant for "Monday 00:00", but we want the
+  // calendar to anchor on Monday 00:00 in the user's *local* timezone so a
+  // drop at "Monday hour 0" maps to the same calendar day the user sees.
+  const weekStart = useMemo(() => {
+    const d = new Date(weekStartISO);
+    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0);
+  }, [weekStartISO]);
   const [activeDrag, setActiveDrag] = useState<{ kind: "lead" | "booking"; label: string } | null>(null);
   const [, startTransition] = useTransition();
   const [showNew, setShowNew] = useState<string | null>(null); // ISO start time
@@ -96,22 +102,27 @@ export function Calendar({
 
   const bookingsBySlot = useMemo(() => {
     const m = new Map<string, BookingDTO[]>();
+    const weekEnd = addDays(weekStart, 7);
     for (const b of bookings) {
       const d = new Date(b.startAtISO);
+      // Only include bookings inside this calendar's local-time week window.
+      if (d < weekStart || d >= weekEnd) continue;
       const dayIdx = (d.getDay() + 6) % 7;
       const key = `${dayIdx}:${d.getHours()}`;
       if (!m.has(key)) m.set(key, []);
       m.get(key)!.push(b);
     }
     return m;
-  }, [bookings]);
+  }, [bookings, weekStart]);
 
   // Map of slots blocked by a *preceding* booking (the slot itself is empty
   // but it falls within another booking's job + travel window).
   const blockedFollowupSlots = useMemo(() => {
     const m = new Map<string, BookingDTO>();
+    const weekEnd = addDays(weekStart, 7);
     for (const b of bookings) {
       const d = new Date(b.startAtISO);
+      if (d < weekStart || d >= weekEnd) continue;
       const dayIdx = (d.getDay() + 6) % 7;
       const startHour = d.getHours();
       for (let i = 1; i < BLOCK_HOURS; i++) {
@@ -120,7 +131,7 @@ export function Calendar({
       }
     }
     return m;
-  }, [bookings]);
+  }, [bookings, weekStart]);
 
   function isOccupiedRange(activeId: string | null, dayIdx: number, hour: number) {
     for (let i = 0; i < BLOCK_HOURS; i++) {

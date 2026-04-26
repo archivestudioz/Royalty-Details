@@ -25,10 +25,17 @@ export default async function SchedulePage({
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 7);
 
+  // Widen the query by 24h on each end so timezone offsets between the
+  // server (UTC) and the user's browser can never push a booking out of view.
+  // The client filters bookings into day/hour cells using the user's local
+  // timezone, so anything outside the visible 7-day grid is silently ignored.
+  const queryStart = new Date(weekStart.getTime() - 24 * 60 * 60 * 1000);
+  const queryEnd = new Date(weekEnd.getTime() + 24 * 60 * 60 * 1000);
+
   const weekBookings = await db
     .select()
     .from(bookings)
-    .where(and(gte(bookings.startAt, weekStart), lt(bookings.startAt, weekEnd)));
+    .where(and(gte(bookings.startAt, queryStart), lt(bookings.startAt, queryEnd)));
 
   const bookedSubmissionIds = (
     await db.select({ id: bookings.submissionId }).from(bookings)
