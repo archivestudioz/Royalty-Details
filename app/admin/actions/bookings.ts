@@ -5,9 +5,9 @@ import { and, eq, gte, lt, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { bookings, submissions } from "@/lib/schema";
 import { readSession } from "@/lib/session";
+import { lookupAddress, blockMinutes } from "@/lib/maps";
 
-const BLOCK_HOURS = 4;
-const BLOCK_MS = BLOCK_HOURS * 60 * 60 * 1000;
+const FALLBACK_BLOCK_MS = 4 * 60 * 60 * 1000;
 
 async function requireUser() {
   const s = await readSession();
@@ -15,20 +15,38 @@ async function requireUser() {
   return s;
 }
 
+/**
+ * Reject the start if it falls within the block window of any other booking
+ * (each booking blocks `job + 2*travel + buffer` minutes — see lib/maps).
+ */
 async function ensureSlotFree(start: Date, ignoreBookingId?: number) {
-  const windowStart = new Date(start.getTime() - BLOCK_MS);
-  const windowEnd = new Date(start.getTime() + BLOCK_MS);
+  // Look at any booking that *could* still overlap, then refine using each one's
+  // actual block duration. The 24h pre-window is generous enough to cover the
+  // longest realistic job + round-trip travel.
+  const lookbackMs = 24 * 60 * 60 * 1000;
+  const lookaheadMs = FALLBACK_BLOCK_MS;
+  const windowStart = new Date(start.getTime() - lookbackMs);
+  const windowEnd = new Date(start.getTime() + lookaheadMs);
+
   const conflicts = await db
-    .select({ id: bookings.id, startAt: bookings.startAt })
+    .select({
+      id: bookings.id,
+      startAt: bookings.startAt,
+      durationMin: bookings.durationMin,
+      travelMinutes: bookings.travelMinutes,
+    })
     .from(bookings)
     .where(
       ignoreBookingId !== undefined
         ? and(gte(bookings.startAt, windowStart), lt(bookings.startAt, windowEnd), ne(bookings.id, ignoreBookingId))
         : and(gte(bookings.startAt, windowStart), lt(bookings.startAt, windowEnd))
     );
+
   for (const c of conflicts) {
-    const diff = Math.abs(c.startAt.getTime() - start.getTime());
-    if (diff < BLOCK_MS) {
+    const cBlockMs = blockMinutes(c.durationMin, c.travelMinutes) * 60 * 1000;
+    const cEnd = c.startAt.getTime() + cBlockMs;
+    // The new booking conflicts if its start falls inside another booking's block window.
+    if (start.getTime() >= c.startAt.getTime() && start.getTime() < cEnd) {
       throw new Error("Slot conflicts with another booking's job + travel buffer");
     }
   }
@@ -53,6 +71,8 @@ export async function createBooking(input: {
   if (Number.isNaN(start.getTime())) throw new Error("Invalid start time");
   await ensureSlotFree(start);
 
+  const geo = await lookupAddress(input.location);
+
   await db.insert(bookings).values({
     customerName: name,
     phone: input.phone?.trim() || null,
@@ -61,6 +81,9 @@ export async function createBooking(input: {
     serviceType: input.serviceType?.trim() || null,
     startAt: start,
     durationMin: input.durationMin ?? 60,
+    latitude: geo?.latitude ?? null,
+    longitude: geo?.longitude ?? null,
+    travelMinutes: geo?.travelMinutes ?? null,
     notes: input.notes?.trim() || null,
     submissionId: input.submissionId ?? null,
     createdBy: Number(s.sub),
@@ -76,6 +99,8 @@ export async function bookFromSubmission(submissionId: number, startAtISO: strin
   if (Number.isNaN(start.getTime())) throw new Error("Invalid start time");
   await ensureSlotFree(start);
 
+  // Submissions don't capture address, so we can't compute travel time at this
+  // stage — the worker can edit the booking later to add a location.
   await db.insert(bookings).values({
     customerName: sub.name,
     phone: sub.phone,

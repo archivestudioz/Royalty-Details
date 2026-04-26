@@ -28,6 +28,8 @@ type BookingDTO = {
   startAtISO: string;
   durationMin: number;
   status: string;
+  travelMinutes: number | null;
+  blockHours: number;
 };
 type LeadDTO = {
   id: number;
@@ -41,7 +43,6 @@ type LeadDTO = {
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const BLOCK_HOURS = 4; // each booking blocks its slot + 3 following hours (job time + travel buffer)
 
 function addDays(d: Date, n: number) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
 function addWeeks(d: Date, n: number) { return addDays(d, n * 7); }
@@ -116,7 +117,7 @@ export function Calendar({
   }, [bookings, weekStart]);
 
   // Map of slots blocked by a *preceding* booking (the slot itself is empty
-  // but it falls within another booking's job + travel window).
+  // but it falls within another booking's per-booking job + travel window).
   const blockedFollowupSlots = useMemo(() => {
     const m = new Map<string, BookingDTO>();
     const weekEnd = addDays(weekStart, 7);
@@ -125,7 +126,7 @@ export function Calendar({
       if (d < weekStart || d >= weekEnd) continue;
       const dayIdx = (d.getDay() + 6) % 7;
       const startHour = d.getHours();
-      for (let i = 1; i < BLOCK_HOURS; i++) {
+      for (let i = 1; i < b.blockHours; i++) {
         const h = startHour + i;
         if (h <= HOURS[HOURS.length - 1]) m.set(`${dayIdx}:${h}`, b);
       }
@@ -134,11 +135,14 @@ export function Calendar({
   }, [bookings, weekStart]);
 
   function isOccupiedRange(activeId: string | null, dayIdx: number, hour: number) {
-    for (let i = 0; i < BLOCK_HOURS; i++) {
+    const movingId = activeId?.startsWith("booking:") ? Number(activeId.slice(8)) : null;
+    // Check the block window we're about to occupy. Without a known travel time
+    // for an unscheduled drop, assume the prior 4-hour default.
+    const probeHours = 4;
+    for (let i = 0; i < probeHours; i++) {
       const key = `${dayIdx}:${hour + i}`;
       const conflicts = bookingsBySlot.get(key) ?? [];
       const blocker = blockedFollowupSlots.get(key);
-      const movingId = activeId?.startsWith("booking:") ? Number(activeId.slice(8)) : null;
       if (conflicts.some((b) => b.id !== movingId)) return true;
       if (blocker && blocker.id !== movingId) return true;
     }
@@ -442,6 +446,15 @@ function BookingCard({ b }: { b: BookingDTO }) {
       <strong style={{ fontSize: 12, color: "var(--gold)" }}>{b.customerName}</strong>
       {b.serviceType ? <div style={{ fontSize: 11, color: "var(--accent)" }}>{b.serviceType}</div> : null}
       {b.location ? <div style={{ fontSize: 11, color: "var(--muted)" }}>{b.location}</div> : null}
+      {b.travelMinutes != null ? (
+        <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
+          🚗 {b.travelMinutes} min from base · blocks {b.blockHours}h
+        </div>
+      ) : (
+        <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
+          📍 add address for ETA
+        </div>
+      )}
       <button
         type="button"
         title="Delete booking"

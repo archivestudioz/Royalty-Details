@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, timestamp, doublePrecision } from "drizzle-orm/pg-core";
 
 export const submissions = pgTable("submissions", {
   id: serial("id").primaryKey(),
@@ -37,6 +37,9 @@ export const bookings = pgTable("bookings", {
   startAt: timestamp("start_at", { withTimezone: true }).notNull(),
   durationMin: integer("duration_min").default(60).notNull(),
   status: text("status").default("scheduled").notNull(),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  travelMinutes: integer("travel_minutes"),
   submissionId: integer("submission_id"),
   notes: text("notes"),
   createdBy: integer("created_by"),

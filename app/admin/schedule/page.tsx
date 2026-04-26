@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { bookings, submissions } from "@/lib/schema";
 import { and, gte, lt, isNull, notInArray, desc } from "drizzle-orm";
 import { Calendar } from "./Calendar";
+import { blockHours } from "@/lib/maps";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +71,8 @@ export default async function SchedulePage({
           startAtISO: b.startAt.toISOString(),
           durationMin: b.durationMin,
           status: b.status,
+          travelMinutes: b.travelMinutes,
+          blockHours: blockHours(b.durationMin, b.travelMinutes),
         }))}
         unscheduled={unscheduled.map((s) => ({
           id: s.id,
