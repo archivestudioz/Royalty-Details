@@ -38,6 +38,7 @@ type LeadDTO = {
 
 const HOURS = Array.from({ length: 11 }, (_, i) => 8 + i);
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const BLOCK_HOURS = 4; // each booking blocks its slot + 3 following hours (job time + travel buffer)
 
 function addDays(d: Date, n: number) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
 function addWeeks(d: Date, n: number) { return addDays(d, n * 7); }
@@ -84,15 +85,47 @@ export function Calendar({
     return m;
   }, [bookings]);
 
+  // Map of slots blocked by a *preceding* booking (the slot itself is empty
+  // but it falls within another booking's job + travel window).
+  const blockedFollowupSlots = useMemo(() => {
+    const m = new Map<string, BookingDTO>();
+    for (const b of bookings) {
+      const d = new Date(b.startAtISO);
+      const dayIdx = (d.getDay() + 6) % 7;
+      const startHour = d.getHours();
+      for (let i = 1; i < BLOCK_HOURS; i++) {
+        const h = startHour + i;
+        if (h <= HOURS[HOURS.length - 1]) m.set(`${dayIdx}:${h}`, b);
+      }
+    }
+    return m;
+  }, [bookings]);
+
+  function isOccupiedRange(activeId: string | null, dayIdx: number, hour: number) {
+    for (let i = 0; i < BLOCK_HOURS; i++) {
+      const key = `${dayIdx}:${hour + i}`;
+      const conflicts = bookingsBySlot.get(key) ?? [];
+      const blocker = blockedFollowupSlots.get(key);
+      const movingId = activeId?.startsWith("booking:") ? Number(activeId.slice(8)) : null;
+      if (conflicts.some((b) => b.id !== movingId)) return true;
+      if (blocker && blocker.id !== movingId) return true;
+    }
+    return false;
+  }
+
   function onDragEnd(e: DragEndEvent) {
     setActiveDrag(null);
     if (!e.over) return;
     const overId = String(e.over.id);
     if (!overId.startsWith("slot:")) return;
     const [, dayStr, hourStr] = overId.split(":");
-    const iso = slotISO(weekStart, Number(dayStr), Number(hourStr));
-
+    const dayIdx = Number(dayStr);
+    const hour = Number(hourStr);
     const activeId = String(e.active.id);
+
+    if (isOccupiedRange(activeId, dayIdx, hour)) return;
+
+    const iso = slotISO(weekStart, dayIdx, hour);
     if (activeId.startsWith("lead:")) {
       const subId = Number(activeId.slice(5));
       startTransition(() => { bookFromSubmission(subId, iso); });
@@ -179,7 +212,14 @@ export function Calendar({
             })}
 
             {HOURS.map((h) => (
-              <Row key={h} hour={h} weekStart={weekStart} bookingsBySlot={bookingsBySlot} onAddNew={(iso) => setShowNew(iso)} />
+              <Row
+                key={h}
+                hour={h}
+                weekStart={weekStart}
+                bookingsBySlot={bookingsBySlot}
+                blockedFollowupSlots={blockedFollowupSlots}
+                onAddNew={(iso) => setShowNew(iso)}
+              />
             ))}
           </div>
         </div>
@@ -204,26 +244,32 @@ function Row({
   hour,
   weekStart,
   bookingsBySlot,
+  blockedFollowupSlots,
   onAddNew,
 }: {
   hour: number;
   weekStart: Date;
   bookingsBySlot: Map<string, BookingDTO[]>;
+  blockedFollowupSlots: Map<string, BookingDTO>;
   onAddNew: (iso: string) => void;
 }) {
   return (
     <>
       <div style={{ ...timeCell }}>{fmtHour(hour)}</div>
-      {Array.from({ length: 7 }).map((_, dayIdx) => (
-        <Slot
-          key={dayIdx}
-          dayIdx={dayIdx}
-          hour={hour}
-          weekStart={weekStart}
-          items={bookingsBySlot.get(`${dayIdx}:${hour}`) ?? []}
-          onAddNew={onAddNew}
-        />
-      ))}
+      {Array.from({ length: 7 }).map((_, dayIdx) => {
+        const key = `${dayIdx}:${hour}`;
+        return (
+          <Slot
+            key={dayIdx}
+            dayIdx={dayIdx}
+            hour={hour}
+            weekStart={weekStart}
+            items={bookingsBySlot.get(key) ?? []}
+            blockedBy={blockedFollowupSlots.get(key) ?? null}
+            onAddNew={onAddNew}
+          />
+        );
+      })}
     </>
   );
 }
@@ -233,17 +279,47 @@ function Slot({
   hour,
   weekStart,
   items,
+  blockedBy,
   onAddNew,
 }: {
   dayIdx: number;
   hour: number;
   weekStart: Date;
   items: BookingDTO[];
+  blockedBy: BookingDTO | null;
   onAddNew: (iso: string) => void;
 }) {
+  const isBlocked = !!blockedBy && items.length === 0;
   const id = `slot:${dayIdx}:${hour}`;
-  const { isOver, setNodeRef } = useDroppable({ id });
+  const { isOver, setNodeRef } = useDroppable({ id, disabled: isBlocked });
   const iso = slotISO(weekStart, dayIdx, hour);
+
+  if (isBlocked) {
+    return (
+      <div
+        ref={setNodeRef}
+        title={`Blocked — ${blockedBy!.customerName} runs through this slot (job + travel buffer)`}
+        style={{
+          borderTop: "1px solid var(--border)",
+          borderLeft: dayIdx === 0 ? "1px solid var(--border)" : "none",
+          minHeight: 64,
+          padding: 4,
+          background: "repeating-linear-gradient(45deg, rgba(200,169,106,0.05) 0 6px, rgba(200,169,106,0.12) 6px 12px)",
+          color: "var(--muted)",
+          fontSize: 10,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          opacity: 0.7,
+        }}
+      >
+        Reserved
+      </div>
+    );
+  }
 
   return (
     <div

@@ -1,15 +1,37 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq, gte, lt, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { bookings, submissions } from "@/lib/schema";
 import { readSession } from "@/lib/session";
+
+const BLOCK_HOURS = 4;
+const BLOCK_MS = BLOCK_HOURS * 60 * 60 * 1000;
 
 async function requireUser() {
   const s = await readSession();
   if (!s) throw new Error("Not authenticated");
   return s;
+}
+
+async function ensureSlotFree(start: Date, ignoreBookingId?: number) {
+  const windowStart = new Date(start.getTime() - BLOCK_MS);
+  const windowEnd = new Date(start.getTime() + BLOCK_MS);
+  const conflicts = await db
+    .select({ id: bookings.id, startAt: bookings.startAt })
+    .from(bookings)
+    .where(
+      ignoreBookingId !== undefined
+        ? and(gte(bookings.startAt, windowStart), lt(bookings.startAt, windowEnd), ne(bookings.id, ignoreBookingId))
+        : and(gte(bookings.startAt, windowStart), lt(bookings.startAt, windowEnd))
+    );
+  for (const c of conflicts) {
+    const diff = Math.abs(c.startAt.getTime() - start.getTime());
+    if (diff < BLOCK_MS) {
+      throw new Error("Slot conflicts with another booking's job + travel buffer");
+    }
+  }
 }
 
 export async function createBooking(input: {
@@ -29,6 +51,7 @@ export async function createBooking(input: {
 
   const start = new Date(input.startAt);
   if (Number.isNaN(start.getTime())) throw new Error("Invalid start time");
+  await ensureSlotFree(start);
 
   await db.insert(bookings).values({
     customerName: name,
@@ -51,6 +74,7 @@ export async function bookFromSubmission(submissionId: number, startAtISO: strin
   if (!sub) throw new Error("Submission not found");
   const start = new Date(startAtISO);
   if (Number.isNaN(start.getTime())) throw new Error("Invalid start time");
+  await ensureSlotFree(start);
 
   await db.insert(bookings).values({
     customerName: sub.name,
@@ -70,6 +94,7 @@ export async function moveBooking(id: number, startAtISO: string) {
   await requireUser();
   const start = new Date(startAtISO);
   if (Number.isNaN(start.getTime())) throw new Error("Invalid start time");
+  await ensureSlotFree(start, id);
   await db.update(bookings).set({ startAt: start }).where(eq(bookings.id, id));
   revalidatePath("/admin/schedule");
 }
