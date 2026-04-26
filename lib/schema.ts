@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
 
 export const submissions = pgTable("submissions", {
   id: serial("id").primaryKey(),
@@ -27,6 +27,24 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const bookings = pgTable("bookings", {
+  id: serial("id").primaryKey(),
+  customerName: text("customer_name").notNull(),
+  phone: text("phone"),
+  email: text("email"),
+  location: text("location"),
+  serviceType: text("service_type"),
+  startAt: timestamp("start_at", { withTimezone: true }).notNull(),
+  durationMin: integer("duration_min").default(60).notNull(),
+  status: text("status").default("scheduled").notNull(),
+  submissionId: integer("submission_id"),
+  notes: text("notes"),
+  createdBy: integer("created_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type Booking = typeof bookings.$inferSelect;
+export type NewBooking = typeof bookings.$inferInsert;

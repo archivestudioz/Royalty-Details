@@ -36,6 +36,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
           <AdminSidebarLink href="/admin/analytics" label="Analytics" />
+          <AdminSidebarLink href="/admin/schedule" label="Schedule" />
           <AdminSidebarLink href="/admin/submissions" label="Submissions" />
         </nav>
 
