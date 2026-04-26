@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Book Mobile Detailing North Jersey | Royalty Details — Online Booking</title>
-<meta name="description" content="Book your mobile auto detail, ceramic coating, or paint correction online. Pick a service, choose your time, and pay — Royalty Details serves Bergen, Hudson, Essex &amp; Passaic counties." />
-<meta name="keywords" content="book mobile detailing North Jersey, online booking auto detailing NJ, schedule ceramic coating Bergen County, book paint correction Hudson County" />
+<title>Request a Quote — Royalty Details Mobile Detailing North Jersey | 551-340-7923</title>
+<meta name="description" content="Request a quote for mobile auto detailing, ceramic coating, or paint correction in North Jersey. Call 551-340-7923 or send an inquiry — we serve Bergen, Hudson, Essex &amp; Passaic counties." />
+<meta name="keywords" content="mobile detailing quote North Jersey, auto detailing inquiry NJ, ceramic coating quote Bergen County, paint correction quote Hudson County" />
 <link rel="canonical" href="https://royaltydetails.com/book" />
 <meta name="robots" content="index, follow, max-image-preview:large" />
 
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Book Online — Royalty Details | Mobile Detailing North Jersey" />
-<meta property="og:description" content="Book your mobile detail, ceramic coating, or paint correction online. Pay in seconds." />
+<meta property="og:title" content="Request a Quote — Royalty Details | Mobile Detailing North Jersey" />
+<meta property="og:description" content="Call us or send an inquiry to book your mobile detail, ceramic coating, or paint correction." />
 <meta property="og:image" content="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/3yBHcBgVqTW7Xvm0m8AP/media/56a6d41f-3d9a-43ce-a30c-2fec47df3a63.jpeg" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,14 +22,16 @@
 <script type="application/ld+json">
 {
   "@context":"https://schema.org",
-  "@type":"ReservationPackage",
-  "name":"Book Royalty Details",
-  "description":"Online booking for mobile auto detailing in North Jersey.",
+  "@type":"ContactPage",
+  "name":"Request a Quote — Royalty Details",
+  "description":"Request a quote for mobile auto detailing in North Jersey.",
   "url":"https://royaltydetails.com/book",
-  "provider":{
+  "mainEntity":{
     "@type":"AutoDetailing",
     "name":"Royalty Details",
-    "telephone":"+1-551-340-7923"
+    "telephone":"+1-551-340-7923",
+    "email":"info@royaltydetails.com",
+    "areaServed":["Bergen County, NJ","Hudson County, NJ","Essex County, NJ","Passaic County, NJ"]
   }
 }
 </script>
@@ -54,52 +56,83 @@
 
 <section class="page-banner">
   <div class="container">
-    <p class="eyebrow">Online Booking</p>
+    <p class="eyebrow">Request a Quote</p>
     <h1>Book Your Detail</h1>
-    <p class="lead">Pick a service, choose your time, and pay — all in one place. We'll come to you anywhere in North Jersey.</p>
+    <p class="lead">Send a quick inquiry below — or give us a call. We'll get back to you the same day with availability and a custom quote.</p>
   </div>
 </section>
 
 <section class="section booking-section">
   <div class="container">
-    <div class="booking-wrap reveal">
-      <!--
-        ===================================================================
-        SQUARE APPOINTMENTS EMBED
-        ===================================================================
-        When your Square Booking Widget iframe code is ready, replace the
-        entire <div class="booking-placeholder"> ... </div> block below
-        with the <iframe> snippet Square provides. Nothing else to change.
-        The surrounding .booking-wrap handles the framing + responsive
-        sizing.
-        ===================================================================
-      -->
-      <div class="booking-placeholder">
-        <div class="booking-placeholder-icon">◆</div>
-        <h2>Online booking is coming soon</h2>
-        <p>Our live booking calendar is being wired up. In the meantime, call or text us and we'll lock your spot in.</p>
-        <div class="booking-cta-row">
-          <a href="tel:5513407923" class="btn btn-gold btn-lg">Call 551-340-7923</a>
-          <a href="contact.html" class="btn btn-outline btn-lg">Send a Message</a>
+    <div class="contact-grid">
+      <form class="contact-form reveal" id="contactForm" novalidate>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" autocomplete="name" autocapitalize="words" required />
+          </div>
+          <div class="form-field">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel" required />
+          </div>
         </div>
-      </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" required />
+          </div>
+          <div class="form-field">
+            <label for="vehicle">Vehicle (Make / Model)</label>
+            <input type="text" id="vehicle" name="vehicle" autocomplete="off" autocapitalize="words" placeholder="e.g. BMW M4" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="service">Service Interested In</label>
+          <select id="service" name="service" required>
+            <option value="">Select a service</option>
+            <option>Exterior Detailing</option>
+            <option>Interior Detailing</option>
+            <option>Ceramic Coating</option>
+            <option>Paint Correction</option>
+            <option>Not sure — recommend something</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="message">Tell us about your vehicle</label>
+          <textarea id="message" name="message" rows="5" placeholder="Condition, location, anything we should know..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-gold btn-lg">Send Inquiry</button>
+        <p class="form-note" id="formNote" hidden>Thanks — we'll be in touch shortly.</p>
+      </form>
+
+      <aside class="contact-aside reveal">
+        <div class="contact-block">
+          <p class="eyebrow gold">01 — Reach Out</p>
+          <h3 style="margin:.25rem 0 .5rem;">Call, text, or send the form</h3>
+          <p class="contact-text">Whichever is easiest. We answer fast.</p>
+        </div>
+        <div class="contact-block">
+          <p class="eyebrow gold">02 — Custom Quote</p>
+          <h3 style="margin:.25rem 0 .5rem;">Same-day reply</h3>
+          <p class="contact-text">We'll confirm pricing, time, and location before anything is booked.</p>
+        </div>
+        <div class="contact-block">
+          <p class="eyebrow gold">03 — We Come To You</p>
+          <h3 style="margin:.25rem 0 .5rem;">Mobile across North Jersey</h3>
+          <p class="contact-text">Bergen, Hudson, Essex &amp; Passaic counties. Driveway, lot, or office.</p>
+        </div>
+      </aside>
     </div>
 
-    <div class="booking-info-grid">
-      <div class="booking-info-card reveal">
-        <p class="eyebrow gold">01 — Pick a Service</p>
-        <h3>Four services, one calendar</h3>
-        <p>Exterior Detailing, Interior Detailing, Ceramic Coating, or Paint Correction. Prices and durations shown before you commit.</p>
-      </div>
-      <div class="booking-info-card reveal">
-        <p class="eyebrow gold">02 — Choose Your Time</p>
-        <h3>Real-time availability</h3>
-        <p>Only open slots show up in the calendar. Morning, afternoon, weekends — pick what works. We come to you.</p>
-      </div>
-      <div class="booking-info-card reveal">
-        <p class="eyebrow gold">03 — Pay Securely</p>
-        <h3>Card, Apple Pay, Google Pay</h3>
-        <p>Payment processed by Square — the same platform used by millions of small businesses. Your booking is confirmed instantly.</p>
+    <div class="booking-wrap reveal" style="margin-top:3rem;">
+      <div class="booking-placeholder">
+        <div class="booking-placeholder-icon">◆</div>
+        <h2>Prefer to talk? Call or text</h2>
+        <p>We answer fast — usually same day.</p>
+        <div class="booking-cta-row">
+          <a href="tel:5513407923" class="btn btn-gold btn-lg">Call 551-340-7923</a>
+          <a href="sms:5513407923" class="btn btn-outline btn-lg">Text Us</a>
+        </div>
       </div>
     </div>
   </div>
@@ -109,8 +142,8 @@
   <div class="container cta-band-inner reveal">
     <div>
       <p class="eyebrow">Not Sure Which Service You Need?</p>
-      <h2>Get a custom quote first.</h2>
-      <p class="lead">Send us details about your vehicle and we'll recommend the right package — call <a href="tel:5513407923" class="link-gold">551-340-7923</a> or message us.</p>
+      <h2>We'll recommend the right package.</h2>
+      <p class="lead">Send details about your vehicle and we'll point you in the right direction — call <a href="tel:5513407923" class="link-gold">551-340-7923</a> or message us.</p>
     </div>
     <a href="contact.html" class="btn btn-gold btn-lg">Contact Us</a>
   </div>
@@ -131,7 +164,7 @@
     <div>
       <h4>Explore</h4>
       <p><a href="services.html">Services</a></p>
-      <p><a href="book.html">Book Online</a></p>
+      <p><a href="book.html">Request a Quote</a></p>
       <p><a href="about.html">About</a></p>
       <p><a href="contact.html">Contact</a></p>
     </div>
