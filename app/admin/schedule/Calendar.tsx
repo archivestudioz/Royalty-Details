@@ -36,7 +36,7 @@ type LeadDTO = {
   createdAtISO: string;
 };
 
-const HOURS = Array.from({ length: 11 }, (_, i) => 8 + i);
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const BLOCK_HOURS = 4; // each booking blocks its slot + 3 following hours (job time + travel buffer)
 
@@ -159,7 +159,7 @@ export function Calendar({
               type="button"
               className="btn"
               style={{ width: "100%" }}
-              onClick={() => setShowNew(slotISO(weekStart, (today.getDay() + 6) % 7, Math.max(8, Math.min(18, today.getHours()))))}
+              onClick={() => setShowNew(slotISO(weekStart, (today.getDay() + 6) % 7, today.getHours()))}
             >
               + New booking
             </button>
