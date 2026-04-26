@@ -19,12 +19,8 @@ async function isValidSession(token: string | undefined) {
   }
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-
-  if (pathname === "/sign-in" || pathname === "/api/contact" || pathname.startsWith("/_next")) {
-    return NextResponse.next();
-  }
 
   const ok = await isValidSession(req.cookies.get(SESSION_COOKIE)?.value);
   if (!ok) {
@@ -37,5 +33,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/admin/:path*", "/admin"],
 };

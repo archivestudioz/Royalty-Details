@@ -2,10 +2,10 @@
 .DS_Store
 ._*
 
-# Node / Next (admin app)
 node_modules
 .next
 .vercel
 .env*.local
+.env.local
 next-env.d.ts
 *.tsbuildinfo
