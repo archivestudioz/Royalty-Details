@@ -135,7 +135,7 @@ p { margin: 0 0 16px; color: var(--muted); }
   align-items: center;
   height: var(--header-h);
 }
-.nav-left { justify-self: start; }
+.nav-left { justify-self: start; margin-left: -40px; }
 .nav-right { justify-self: end; }
 .nav-row > .logo { justify-self: center; }
 .logo {
