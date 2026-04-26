@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
+    "db:generate": "node --env-file=.env.local node_modules/drizzle-kit/bin.cjs generate",
+    "db:push": "node --env-file=.env.local node_modules/drizzle-kit/bin.cjs push",
+    "db:studio": "node --env-file=.env.local node_modules/drizzle-kit/bin.cjs studio",
     "user:create": "tsx --env-file=.env.local scripts/create-user.ts"
   },
   "dependencies": {
