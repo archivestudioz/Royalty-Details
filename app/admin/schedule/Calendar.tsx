@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { bookFromSubmission, moveBooking, deleteBooking } from "../actions/bookings";
 import { NewBookingForm } from "./NewBookingForm";
+import { MonthPicker } from "./MonthPicker";
 
 type BookingDTO = {
   id: number;
@@ -182,7 +183,8 @@ export function Calendar({
             <div style={{ fontSize: 15, fontWeight: 600 }}>
               Week of {fmtMonthDay(weekStart)} – {fmtMonthDay(addDays(weekStart, 6))}
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <MonthPicker weekStartISO={weekStartISO} />
               <Link href={`/admin/schedule?week=${prevWeek}`} className="btn" style={navBtn}>← Prev</Link>
               <Link href={`/admin/schedule`} className="btn" style={navBtn}>Today</Link>
               <Link href={`/admin/schedule?week=${nextWeek}`} className="btn" style={navBtn}>Next →</Link>
