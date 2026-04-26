@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { signIn } from "../actions/auth";
 import { readSession } from "@/lib/session";
+import { PasswordInput } from "./PasswordInput";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ export default async function SignInPage({
             type="email"
             name="email"
             required
-            autoComplete="email"
+            autoComplete="username"
             autoCapitalize="off"
             style={inputStyle}
           />
@@ -37,13 +38,7 @@ export default async function SignInPage({
 
         <label style={{ display: "block", marginBottom: 18 }}>
           <div className="field-label">Password</div>
-          <input
-            type="password"
-            name="password"
-            required
-            autoComplete="current-password"
-            style={inputStyle}
-          />
+          <PasswordInput />
         </label>
 
         {params.error ? (
