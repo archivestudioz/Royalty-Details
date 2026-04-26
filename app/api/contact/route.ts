@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { db } from "@/lib/db";
 import { submissions } from "@/lib/schema";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const ALLOWED = (process.env.ALLOWED_ORIGIN ?? "").split(",").map((o) => o.trim()).filter(Boolean);
 
@@ -58,6 +60,8 @@ export async function POST(req: NextRequest) {
     console.error("[contact] insert failed", err);
     return NextResponse.json({ error: "Failed to save submission" }, { status: 500, headers });
   }
+
+  after(() => sendWelcomeEmail({ to: email, name, service, vehicle }));
 
   return NextResponse.json({ ok: true }, { status: 201, headers });
 }
