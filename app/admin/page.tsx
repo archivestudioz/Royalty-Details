@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
 import { submissions } from "@/lib/schema";
 import { desc } from "drizzle-orm";
-import { signOut } from "../actions/auth";
 import { readSession } from "@/lib/session";
+import { AdminNav } from "./AdminNav";
 
 export const dynamic = "force-dynamic";
 
@@ -19,18 +19,10 @@ export default async function AdminPage() {
 
   return (
     <main className="container">
-      <div className="header">
-        <div>
-          <h1>Royalty Details — Submissions</h1>
-          <div className="muted" style={{ fontSize: 13 }}>
-            {rows.length} most recent · signed in as {session?.email}
-          </div>
-        </div>
-        <form action={signOut}>
-          <button type="submit" className="btn" style={{ background: "transparent", color: "var(--gold)", border: "1px solid var(--border)" }}>
-            Sign out
-          </button>
-        </form>
+      <AdminNav active="submissions" email={session?.email} />
+
+      <div className="muted" style={{ fontSize: 13, marginBottom: 16 }}>
+        {rows.length} most recent submission{rows.length === 1 ? "" : "s"}
       </div>
 
       {rows.length === 0 ? (
