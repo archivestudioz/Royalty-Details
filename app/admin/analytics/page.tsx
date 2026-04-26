@@ -1,8 +1,6 @@
 import { db } from "@/lib/db";
 import { submissions } from "@/lib/schema";
 import { gte, sql } from "drizzle-orm";
-import { readSession } from "@/lib/session";
-import { AdminNav } from "../AdminNav";
 
 export const dynamic = "force-dynamic";
 
@@ -21,8 +19,6 @@ function shortDate(d: Date) {
 }
 
 export default async function AnalyticsPage() {
-  const session = await readSession();
-
   const now = new Date();
   const since90 = new Date(now.getTime() - 90 * DAY_MS);
 
@@ -72,7 +68,12 @@ export default async function AnalyticsPage() {
 
   return (
     <main className="container">
-      <AdminNav active="analytics" email={session?.email} />
+      <div className="header">
+        <div>
+          <h1>Analytics</h1>
+          <div className="muted" style={{ fontSize: 13 }}>Form submissions over the last 90 days</div>
+        </div>
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 24 }}>
         <StatCard label="Last 30 days" value={last30} />
