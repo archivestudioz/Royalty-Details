@@ -11,6 +11,9 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  pointerWithin,
+  rectIntersection,
+  type CollisionDetection,
 } from "@dnd-kit/core";
 import Link from "next/link";
 import { bookFromSubmission, moveBooking, deleteBooking } from "../actions/bookings";
@@ -70,9 +73,17 @@ export function Calendar({
   const [showNew, setShowNew] = useState<string | null>(null); // ISO start time
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 8 } }),
   );
+
+  // Always drop on the slot under the pointer; fall back to rect intersection
+  // so a dropped card never "stalls" outside any slot.
+  const collisionDetection: CollisionDetection = (args) => {
+    const pointer = pointerWithin(args);
+    if (pointer.length > 0) return pointer;
+    return rectIntersection(args);
+  };
 
   const bookingsBySlot = useMemo(() => {
     const m = new Map<string, BookingDTO[]>();
@@ -143,6 +154,7 @@ export function Calendar({
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={collisionDetection}
       onDragStart={(e) => {
         const id = String(e.active.id);
         const label = id.startsWith("lead:")
