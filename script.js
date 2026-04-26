@@ -47,16 +47,38 @@ if (reviewsTrack) {
   });
 }
 
-// Contact form (front-end only — wire up to a real backend later)
+// Contact form — posts to the admin backend (set window.RD_API_BASE before this script if hosting separately)
 const form = document.getElementById('contactForm');
 const note = document.getElementById('formNote');
+const API_BASE = (typeof window !== 'undefined' && window.RD_API_BASE) || '';
 if (form) {
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (note) {
-      note.hidden = false;
-      form.reset();
-      setTimeout(() => { note.hidden = true; }, 6000);
+    const submit = form.querySelector('button[type="submit"]');
+    if (submit) submit.disabled = true;
+
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    try {
+      const res = await fetch(`${API_BASE}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Request failed');
+      if (note) {
+        note.textContent = "Thanks — we'll be in touch shortly.";
+        note.hidden = false;
+        form.reset();
+        setTimeout(() => { note.hidden = true; }, 6000);
+      }
+    } catch (err) {
+      if (note) {
+        note.textContent = "Sorry — couldn't send right now. Please try again or call us.";
+        note.hidden = false;
+      }
+    } finally {
+      if (submit) submit.disabled = false;
     }
   });
 }
