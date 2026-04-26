@@ -38,6 +38,13 @@ export async function POST(req: NextRequest) {
   const service = body.service ? String(body.service).trim() : null;
   const message = body.message ? String(body.message).trim() : null;
 
+  const trim255 = (v: unknown) => v ? String(v).trim().slice(0, 255) : null;
+  const referrer = trim255(body.referrer);
+  const utmSource = trim255(body.utm_source);
+  const utmMedium = trim255(body.utm_medium);
+  const utmCampaign = trim255(body.utm_campaign);
+  const landingPath = trim255(body.landing_path);
+
   if (!name || !email || !phone) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400, headers });
   }
@@ -54,7 +61,9 @@ export async function POST(req: NextRequest) {
   try {
     await db.insert(submissions).values({
       name, email, phone, vehicle, service, message,
-      source: "contact", ipAddress, userAgent,
+      source: "contact",
+      referrer, utmSource, utmMedium, utmCampaign, landingPath,
+      ipAddress, userAgent,
     });
   } catch (err) {
     console.error("[contact] insert failed", err);

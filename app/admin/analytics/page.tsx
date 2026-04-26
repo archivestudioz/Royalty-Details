@@ -63,6 +63,23 @@ export default async function AnalyticsPage() {
 
   const services = [...byService.entries()].sort((a, b) => b[1] - a[1]);
 
+  const sourceRows = await db
+    .select({
+      utmSource: submissions.utmSource,
+      referrer: submissions.referrer,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(submissions)
+    .where(gte(submissions.createdAt, since90))
+    .groupBy(submissions.utmSource, submissions.referrer);
+
+  const bySource = new Map<string, number>();
+  for (const r of sourceRows) {
+    const label = classifySource(r.utmSource, r.referrer);
+    bySource.set(label, (bySource.get(label) ?? 0) + r.count);
+  }
+  const sources = [...bySource.entries()].sort((a, b) => b[1] - a[1]);
+
   const totalAll = sumSince(90);
   const avgPerDay = (totalAll / 90).toFixed(1);
 
@@ -113,6 +130,30 @@ export default async function AnalyticsPage() {
       </section>
 
       <section className="card" style={{ padding: 24, marginTop: 14 }}>
+        <strong style={{ letterSpacing: "0.02em", display: "block", marginBottom: 14 }}>By lead source (last 90 days)</strong>
+        {sources.length === 0 ? (
+          <div className="muted" style={{ fontSize: 14 }}>No submissions yet.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {sources.map(([name, count]) => {
+              const pct = totalAll > 0 ? Math.round((count / totalAll) * 100) : 0;
+              return (
+                <div key={name}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
+                    <span style={{ textTransform: "capitalize" }}>{name}</span>
+                    <span className="muted">{count} · {pct}%</span>
+                  </div>
+                  <div style={{ height: 6, background: "var(--border)", borderRadius: 999, overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: "var(--gold)" }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className="card" style={{ padding: 24, marginTop: 14 }}>
         <strong style={{ letterSpacing: "0.02em", display: "block", marginBottom: 14 }}>By service (last 90 days)</strong>
         {services.length === 0 ? (
           <div className="muted" style={{ fontSize: 14 }}>No submissions yet.</div>
@@ -137,6 +178,25 @@ export default async function AnalyticsPage() {
       </section>
     </main>
   );
+}
+
+function classifySource(utmSource: string | null, referrer: string | null): string {
+  if (utmSource) return utmSource.toLowerCase();
+  if (!referrer) return "Direct";
+  try {
+    const host = new URL(referrer).hostname.replace(/^www\./, "");
+    if (host.includes("google")) return "google";
+    if (host.includes("bing")) return "bing";
+    if (host.includes("instagram")) return "instagram";
+    if (host.includes("facebook") || host.includes("fb.")) return "facebook";
+    if (host.includes("tiktok")) return "tiktok";
+    if (host.includes("youtube") || host.includes("youtu.be")) return "youtube";
+    if (host.includes("twitter") || host.includes("x.com")) return "twitter";
+    if (host.includes("yelp")) return "yelp";
+    return host;
+  } catch {
+    return "Other";
+  }
 }
 
 function StatCard({ label, value }: { label: string; value: number | string }) {

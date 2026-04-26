@@ -47,6 +47,31 @@ if (reviewsTrack) {
   });
 }
 
+// Capture lead-source attribution on first landing and persist for this session.
+// We keep the FIRST values seen so a follow-up visit from a bookmark doesn't overwrite the original source.
+(function captureAttribution() {
+  try {
+    const KEY = 'rd_attr_v1';
+    if (sessionStorage.getItem(KEY)) return;
+    const params = new URLSearchParams(window.location.search);
+    const attr = {
+      utm_source: params.get('utm_source') || null,
+      utm_medium: params.get('utm_medium') || null,
+      utm_campaign: params.get('utm_campaign') || null,
+      referrer: document.referrer || null,
+      landing_path: window.location.pathname || null,
+    };
+    sessionStorage.setItem(KEY, JSON.stringify(attr));
+  } catch (_) { /* sessionStorage unavailable — ignore */ }
+})();
+
+function getAttribution() {
+  try {
+    const raw = sessionStorage.getItem('rd_attr_v1');
+    return raw ? JSON.parse(raw) : {};
+  } catch (_) { return {}; }
+}
+
 // Contact form — posts to the admin backend (set window.RD_API_BASE before this script if hosting separately)
 const form = document.getElementById('contactForm');
 const note = document.getElementById('formNote');
@@ -58,6 +83,7 @@ if (form) {
     if (submit) submit.disabled = true;
 
     const data = Object.fromEntries(new FormData(form).entries());
+    Object.assign(data, getAttribution());
 
     try {
       const res = await fetch(`${API_BASE}/api/contact`, {
