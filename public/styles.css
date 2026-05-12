@@ -144,6 +144,7 @@ p { margin: 0 0 16px; color: var(--muted); }
   font-size: 16px;
   letter-spacing: 0.25em;
   color: #fff;
+  white-space: nowrap;
 }
 .logo span { color: var(--gold); }
 .nav {
@@ -411,8 +412,8 @@ p { margin: 0 0 16px; color: var(--muted); }
 .areas { background: var(--bg); border-top: 1px solid var(--line); }
 .areas-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 56px 40px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 56px 28px;
 }
 .area-col {
   padding: 0;
@@ -550,6 +551,7 @@ p { margin: 0 0 16px; color: var(--muted); }
 }
 .review-card {
   flex: 0 0 360px;
+  height: 300px;
   background: linear-gradient(180deg, var(--bg-3) 0%, var(--bg-2) 100%);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -575,6 +577,10 @@ p { margin: 0 0 16px; color: var(--muted); }
   line-height: 1.6;
   margin: 0;
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .review-meta {
   display: flex;
@@ -943,6 +949,9 @@ p { margin: 0 0 16px; color: var(--muted); }
      and nav-left's drawer slides in from x=0 instead of x=-120px (which made
      the drawer invisible). */
   .nav-right { order: 2; display: flex; gap: 14px; align-items: center; margin-right: 0; }
+  .nav-right .nav-cta { padding: 8px 14px; font-size: 10px; }
+  .nav-row > .logo { font-size: 14px; letter-spacing: 0.2em; }
+  .hero-content > .eyebrow { letter-spacing: 0.15em; }
   .nav-left { margin-left: 0; }
   .nav-left {
     position: fixed;
