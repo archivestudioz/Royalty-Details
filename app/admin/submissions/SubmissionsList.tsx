@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { deleteSubmission } from "../actions/submissions";
+import { deleteSubmission, updateSubmissionAmount } from "../actions/submissions";
 import type { Submission } from "@/lib/schema";
 
 function formatDate(d: Date) {
@@ -9,6 +9,25 @@ function formatDate(d: Date) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(d);
+}
+
+const USD = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+function centsToInput(cents: number | null | undefined): string {
+  if (cents == null) return "";
+  return (cents / 100).toFixed(2).replace(/\.00$/, "");
+}
+
+function inputToCents(raw: string): number | null {
+  const trimmed = raw.trim().replace(/^\$/, "").replace(/,/g, "");
+  if (trimmed === "") return null;
+  const n = Number(trimmed);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return Math.round(n * 100);
 }
 
 export function SubmissionsList({ rows }: { rows: Submission[] }) {
@@ -37,6 +56,9 @@ export function SubmissionsList({ rows }: { rows: Submission[] }) {
 function SubmissionCard({ row, onRemoved }: { row: Submission; onRemoved: () => void }) {
   const [pending, startTransition] = useTransition();
   const [confirming, setConfirming] = useState(false);
+  const [amount, setAmount] = useState(centsToInput(row.amountCents));
+  const [savedAmount, setSavedAmount] = useState(row.amountCents ?? null);
+  const [amountSaving, setAmountSaving] = useState(false);
 
   function handleDelete() {
     if (!confirming) {
@@ -51,6 +73,21 @@ function SubmissionCard({ row, onRemoved }: { row: Submission; onRemoved: () => 
         setConfirming(false);
       }
     });
+  }
+
+  function commitAmount() {
+    const cents = inputToCents(amount);
+    if (cents === savedAmount) return;
+    setAmountSaving(true);
+    updateSubmissionAmount(row.id, cents)
+      .then(() => {
+        setSavedAmount(cents);
+        setAmount(centsToInput(cents));
+      })
+      .catch(() => {
+        setAmount(centsToInput(savedAmount));
+      })
+      .finally(() => setAmountSaving(false));
   }
 
   return (
@@ -88,6 +125,30 @@ function SubmissionCard({ row, onRemoved }: { row: Submission; onRemoved: () => 
               Delete
             </button>
           )}
+        </div>
+      </div>
+
+      <div className="submission-amount-row">
+        <div className="field-label">Service amount</div>
+        <div className="submission-amount-input-wrap">
+          <span className="submission-amount-prefix">$</span>
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            onBlur={commitAmount}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+            className="submission-amount-input"
+            disabled={amountSaving}
+          />
+          {amountSaving ? <span className="submission-amount-status">Saving…</span> : null}
         </div>
       </div>
 

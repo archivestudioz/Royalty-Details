@@ -16,6 +16,7 @@ export const submissions = pgTable("submissions", {
   landingPath: text("landing_path"),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
+  amountCents: integer("amount_cents"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

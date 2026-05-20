@@ -1,7 +1,7 @@
 import { db, DEV_NO_DB } from "@/lib/db";
 import { submissions } from "@/lib/schema";
-import { gte, sql } from "drizzle-orm";
-import { devMockDailyRows, devMockSourceRows } from "./devMock";
+import { gte, sql, isNotNull, and } from "drizzle-orm";
+import { devMockDailyRows, devMockSourceRows, devMockRevenueRows } from "./devMock";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +17,10 @@ function dateKey(d: Date) {
 
 function shortDate(d: Date) {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(d);
+}
+
+function formatUsd(cents: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(cents / 100);
 }
 
 export default async function AnalyticsPage() {
@@ -88,6 +92,47 @@ export default async function AnalyticsPage() {
   const totalAll = sumSince(90);
   const avgPerDay = (totalAll / 90).toFixed(1);
 
+  // Revenue aggregation — only submissions that have an amount logged
+  const revenueRows = DEV_NO_DB
+    ? devMockRevenueRows(now)
+    : await db
+        .select({
+          day: sql<string>`to_char(date_trunc('day', ${submissions.createdAt}), 'YYYY-MM-DD')`,
+          totalCents: sql<number>`coalesce(sum(${submissions.amountCents}), 0)::int`,
+          jobs: sql<number>`count(${submissions.amountCents})::int`,
+          service: submissions.service,
+        })
+        .from(submissions)
+        .where(and(gte(submissions.createdAt, since90), isNotNull(submissions.amountCents)))
+        .groupBy(sql`date_trunc('day', ${submissions.createdAt})`, submissions.service);
+
+  const revenueByDay = new Map<string, number>();
+  const revenueByService = new Map<string, number>();
+  let totalJobs = 0;
+  let totalCents = 0;
+  for (const r of revenueRows) {
+    revenueByDay.set(r.day, (revenueByDay.get(r.day) ?? 0) + r.totalCents);
+    const s = r.service ?? "Unspecified";
+    revenueByService.set(s, (revenueByService.get(s) ?? 0) + r.totalCents);
+    totalJobs += r.jobs;
+    totalCents += r.totalCents;
+  }
+
+  const sumRevenueSince = (days: number) => {
+    const cutoff = new Date(now.getTime() - days * DAY_MS);
+    let total = 0;
+    for (const [k, v] of revenueByDay) {
+      if (new Date(`${k}T00:00:00Z`) >= cutoff) total += v;
+    }
+    return total;
+  };
+
+  const revenue30 = sumRevenueSince(30);
+  const revenue60 = sumRevenueSince(60);
+  const revenue90 = sumRevenueSince(90);
+  const avgPerJobCents = totalJobs > 0 ? Math.round(totalCents / totalJobs) : 0;
+  const revenueServices = [...revenueByService.entries()].sort((a, b) => b[1] - a[1]);
+
   return (
     <main className="container">
       <div className="header">
@@ -132,6 +177,39 @@ export default async function AnalyticsPage() {
           <span>{shortDate(dailySeries[Math.floor(dailySeries.length / 2)].date)}</span>
           <span>{shortDate(dailySeries[dailySeries.length - 1].date)}</span>
         </div>
+      </section>
+
+      <section className="card" style={{ padding: 24, marginTop: 14 }}>
+        <strong style={{ letterSpacing: "0.02em", display: "block", marginBottom: 14 }}>Revenue — last 90 days</strong>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: revenueServices.length > 0 ? 20 : 0 }}>
+          <StatCard label="Last 30 days" value={formatUsd(revenue30)} />
+          <StatCard label="Last 60 days" value={formatUsd(revenue60)} />
+          <StatCard label="Last 90 days" value={formatUsd(revenue90)} />
+          <StatCard label="Avg per job" value={totalJobs > 0 ? formatUsd(avgPerJobCents) : "—"} />
+        </div>
+        {revenueServices.length === 0 ? (
+          <div className="muted" style={{ fontSize: 14 }}>No service amounts logged yet. Add a Service amount on a submission to start tracking revenue.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 6 }}>
+            <div className="muted" style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              By service
+            </div>
+            {revenueServices.map(([name, cents]) => {
+              const pct = totalCents > 0 ? Math.round((cents / totalCents) * 100) : 0;
+              return (
+                <div key={name}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
+                    <span>{name}</span>
+                    <span className="muted">{formatUsd(cents)} · {pct}%</span>
+                  </div>
+                  <div style={{ height: 6, background: "var(--border)", borderRadius: 999, overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: "var(--gold)" }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <section className="card" style={{ padding: 24, marginTop: 14 }}>

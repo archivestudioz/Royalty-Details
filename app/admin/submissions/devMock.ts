@@ -25,6 +25,7 @@ export function devMockSubmissions(): Submission[] {
       landingPath: "/services/paint-correction",
       ipAddress: null,
       userAgent: null,
+      amountCents: 85000,
       createdAt: hoursAgo(2),
     },
     {
@@ -43,6 +44,7 @@ export function devMockSubmissions(): Submission[] {
       landingPath: "/",
       ipAddress: null,
       userAgent: null,
+      amountCents: 12000,
       createdAt: hoursAgo(20),
     },
     {
@@ -62,6 +64,7 @@ export function devMockSubmissions(): Submission[] {
       landingPath: "/services/ceramic-coating",
       ipAddress: null,
       userAgent: null,
+      amountCents: 220000,
       createdAt: hoursAgo(54),
     },
     {
@@ -80,6 +83,7 @@ export function devMockSubmissions(): Submission[] {
       landingPath: "/",
       ipAddress: null,
       userAgent: null,
+      amountCents: null,
       createdAt: hoursAgo(96),
     },
   ];

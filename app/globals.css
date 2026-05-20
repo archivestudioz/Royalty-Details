@@ -351,6 +351,54 @@ pre.message {
 }
 .submission-btn--danger:hover { color: #ff8a8a; border-color: #ff8a8a; }
 
+.submission-amount-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(200, 169, 106, 0.06);
+  border: 1px solid rgba(200, 169, 106, 0.2);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.submission-amount-row .field-label { margin-bottom: 0; }
+.submission-amount-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.submission-amount-prefix {
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 16px;
+}
+.submission-amount-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed transparent;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+  padding: 2px 0;
+  outline: none;
+}
+.submission-amount-input:hover,
+.submission-amount-input:focus {
+  border-bottom-color: rgba(200, 169, 106, 0.45);
+}
+.submission-amount-input:disabled { opacity: 0.6; }
+.submission-amount-status {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 @media (max-width: 720px) {
   .admin-shell { flex-direction: column; }
   .admin-sidebar {
