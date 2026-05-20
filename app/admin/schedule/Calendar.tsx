@@ -190,8 +190,8 @@ export function Calendar({
       onDragCancel={() => setActiveDrag(null)}
       onDragEnd={onDragEnd}
     >
-      <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16 }}>
-        <aside>
+      <div className="schedule-grid">
+        <aside className="schedule-sidebar">
           <div className="card" style={{ padding: 16, marginBottom: 12 }}>
             <button
               type="button"
@@ -215,12 +215,12 @@ export function Calendar({
           </div>
         </aside>
 
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <div style={{ fontSize: 15, fontWeight: 600 }}>
+        <div className="schedule-main">
+          <div className="schedule-week-header">
+            <div className="schedule-week-title">
               Week of {fmtMonthDay(weekStart)} – {fmtMonthDay(addDays(weekStart, 6))}
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div className="schedule-week-controls">
               <MonthPicker weekStartISO={weekStartISO} />
               <Link href={`/admin/schedule?week=${prevWeek}`} className="btn" style={navBtn}>← Prev</Link>
               <Link href={`/admin/schedule`} className="btn" style={navBtn}>Today</Link>
@@ -228,7 +228,9 @@ export function Calendar({
             </div>
           </div>
 
+          <div className="schedule-calendar-scroll">
           <div
+            className="schedule-calendar"
             style={{
               display: "grid",
               gridTemplateColumns: "70px repeat(7, 1fr)",
@@ -260,6 +262,7 @@ export function Calendar({
                 onAddNew={(iso) => setShowNew(iso)}
               />
             ))}
+          </div>
           </div>
         </div>
       </div>

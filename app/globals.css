@@ -110,3 +110,298 @@ pre.message {
   font-size: 14px;
   color: var(--text);
 }
+
+/* Admin shell — sidebar layout on desktop, top bar on mobile */
+.admin-shell { display: flex; min-height: 100vh; }
+.admin-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+  padding: 28px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.admin-brand-block { display: block; text-decoration: none; }
+.admin-brand-block:hover { text-decoration: none; }
+.admin-brand {
+  color: var(--gold);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  font-size: 14px;
+}
+.admin-brand-alt { color: var(--text); }
+.admin-tag {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.admin-link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.admin-link:hover { text-decoration: none; color: var(--text); }
+.admin-link--active {
+  background: rgba(200, 169, 106, 0.12);
+  color: var(--gold);
+  border-color: rgba(200, 169, 106, 0.3);
+}
+.admin-link--active:hover { color: var(--gold); }
+.admin-user {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.admin-user-email {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 8px;
+  word-break: break-all;
+}
+.admin-signout {
+  width: 100%;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+}
+.admin-content { flex: 1; min-width: 0; }
+
+/* Schedule page layout */
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+}
+.schedule-main { min-width: 0; }
+.schedule-week-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.schedule-week-title { font-size: 15px; font-weight: 600; }
+.schedule-week-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.schedule-calendar-scroll { overflow-x: auto; min-width: 0; }
+.schedule-calendar { min-width: 720px; }
+
+/* New booking modal */
+.booking-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  padding: 16px;
+  overflow-y: auto;
+}
+.booking-form {
+  width: 100%;
+  max-width: 460px;
+  padding: 24px;
+  margin: auto;
+}
+.booking-form-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.booking-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.booking-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #0e0e12;
+  color: var(--text);
+  font-size: 14px;
+  margin-top: 4px;
+  display: block;
+  min-width: 0;
+}
+.booking-textarea { resize: vertical; }
+.booking-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 10px;
+}
+
+.service-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.service-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #0e0e12;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.service-chip:hover { color: var(--text); }
+.service-chip--on {
+  background: rgba(200, 169, 106, 0.14);
+  color: var(--gold);
+  border-color: rgba(200, 169, 106, 0.45);
+}
+.service-chip-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Submission card fields */
+.submission-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.submission-value {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.submission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.submission-header > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+.submission-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.submission-btn {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.submission-btn:hover { color: var(--text); border-color: var(--muted); }
+.submission-btn:disabled { opacity: 0.6; cursor: default; }
+.submission-btn--danger {
+  color: #ff8a8a;
+  border-color: rgba(255, 138, 138, 0.4);
+  background: rgba(255, 138, 138, 0.08);
+}
+.submission-btn--danger:hover { color: #ff8a8a; border-color: #ff8a8a; }
+
+@media (max-width: 720px) {
+  .admin-shell { flex-direction: column; }
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 12px 14px;
+    gap: 10px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    z-index: 20;
+  }
+  .admin-brand-block { flex-shrink: 0; }
+  .admin-brand { font-size: 13px; }
+  .admin-tag { display: none; }
+  .admin-nav {
+    order: 3;
+    flex-basis: 100%;
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    margin: 4px -14px 0;
+    padding: 2px 14px;
+    flex: none;
+    scrollbar-width: none;
+  }
+  .admin-nav::-webkit-scrollbar { display: none; }
+  .admin-link {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .admin-user {
+    margin-left: auto;
+    border-top: none;
+    padding-top: 0;
+  }
+  .admin-user-email { display: none; }
+  .admin-signout {
+    width: auto;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .container { padding: 20px 16px; }
+  .header { flex-wrap: wrap; gap: 8px; }
+  .header h1 { font-size: 18px; }
+  .schedule-grid { grid-template-columns: 1fr; }
+  .schedule-week-controls .btn { padding: 8px 10px; font-size: 12px; }
+  .booking-form { padding: 18px; }
+  .booking-row { grid-template-columns: 1fr; gap: 0; }
+  .submission-fields { grid-template-columns: 1fr; gap: 10px; }
+}

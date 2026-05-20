@@ -1,6 +1,7 @@
-import { db } from "@/lib/db";
+import { db, DEV_NO_DB } from "@/lib/db";
 import { submissions } from "@/lib/schema";
 import { gte, sql } from "drizzle-orm";
+import { devMockDailyRows, devMockSourceRows } from "./devMock";
 
 export const dynamic = "force-dynamic";
 
@@ -22,15 +23,17 @@ export default async function AnalyticsPage() {
   const now = new Date();
   const since90 = new Date(now.getTime() - 90 * DAY_MS);
 
-  const rows = await db
-    .select({
-      day: sql<string>`to_char(date_trunc('day', ${submissions.createdAt}), 'YYYY-MM-DD')`,
-      count: sql<number>`count(*)::int`,
-      service: submissions.service,
-    })
-    .from(submissions)
-    .where(gte(submissions.createdAt, since90))
-    .groupBy(sql`date_trunc('day', ${submissions.createdAt})`, submissions.service);
+  const rows = DEV_NO_DB
+    ? devMockDailyRows(now)
+    : await db
+        .select({
+          day: sql<string>`to_char(date_trunc('day', ${submissions.createdAt}), 'YYYY-MM-DD')`,
+          count: sql<number>`count(*)::int`,
+          service: submissions.service,
+        })
+        .from(submissions)
+        .where(gte(submissions.createdAt, since90))
+        .groupBy(sql`date_trunc('day', ${submissions.createdAt})`, submissions.service);
 
   const byDay = new Map<string, number>();
   const byService = new Map<string, number>();
@@ -63,15 +66,17 @@ export default async function AnalyticsPage() {
 
   const services = [...byService.entries()].sort((a, b) => b[1] - a[1]);
 
-  const sourceRows = await db
-    .select({
-      utmSource: submissions.utmSource,
-      referrer: submissions.referrer,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(submissions)
-    .where(gte(submissions.createdAt, since90))
-    .groupBy(submissions.utmSource, submissions.referrer);
+  const sourceRows = DEV_NO_DB
+    ? devMockSourceRows()
+    : await db
+        .select({
+          utmSource: submissions.utmSource,
+          referrer: submissions.referrer,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(submissions)
+        .where(gte(submissions.createdAt, since90))
+        .groupBy(submissions.utmSource, submissions.referrer);
 
   const bySource = new Map<string, number>();
   for (const r of sourceRows) {

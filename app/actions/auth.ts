@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { db, DEV_NO_DB } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { createSession, destroySession } from "@/lib/session";
 
@@ -14,6 +14,11 @@ export async function signIn(formData: FormData) {
 
   if (!email || !password) {
     redirect(`/sign-in?error=invalid&next=${encodeURIComponent(next)}`);
+  }
+
+  if (DEV_NO_DB) {
+    await createSession({ sub: "0", email });
+    redirect(next.startsWith("/") ? next : "/admin");
   }
 
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
