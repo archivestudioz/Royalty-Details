@@ -24,12 +24,12 @@ export function devMockDailyRows(now: Date) {
   const rnd = seededRandom(42);
   const rows: { day: string; count: number; service: string | null }[] = [];
 
-  for (let i = 0; i < 90; i++) {
+  for (let i = 0; i < 150; i++) {
     const d = new Date(now.getTime() - i * DAY_MS);
     const dayKey = d.toISOString().slice(0, 10);
     const dayOfWeek = d.getUTCDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    const recency = 1 + (90 - i) / 90;
+    const recency = 1 + (150 - i) / 150;
     const base = (isWeekend ? 2.5 : 1.4) * recency;
     const total = Math.max(0, Math.round(base + rnd() * 2.5 - 1));
 
@@ -64,7 +64,7 @@ export function devMockRevenueRows(now: Date) {
   const rnd = seededRandom(73);
   const rows: { day: string; totalCents: number; jobs: number; service: string | null }[] = [];
 
-  for (let i = 0; i < 90; i++) {
+  for (let i = 0; i < 150; i++) {
     const d = new Date(now.getTime() - i * DAY_MS);
     const dayKey = d.toISOString().slice(0, 10);
     const dayOfWeek = d.getUTCDay();
