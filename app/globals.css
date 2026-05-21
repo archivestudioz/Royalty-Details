@@ -1,11 +1,12 @@
 :root {
-  --bg: #0b0b0c;
-  --panel: #15151a;
-  --border: #2a2a33;
+  --bg: #04101e;
+  --panel: #081a30;
+  --border: #173052;
   --text: #f5f4ee;
-  --muted: #9b9aa3;
+  --muted: #9ba3b0;
   --gold: #c8a96a;
   --accent: #e0c789;
+  --black: #000000;
 }
 
 * { box-sizing: border-box; }
@@ -99,7 +100,7 @@ a:hover { text-decoration: underline; }
 }
 
 pre.message {
-  background: #0e0e12;
+  background: #020a14;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 10px 12px;
@@ -254,7 +255,7 @@ pre.message {
   padding: 8px 10px;
   border-radius: 6px;
   border: 1px solid var(--border);
-  background: #0e0e12;
+  background: #020a14;
   color: var(--text);
   font-size: 14px;
   margin-top: 4px;
@@ -280,7 +281,7 @@ pre.message {
   padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: #0e0e12;
+  background: #020a14;
   color: var(--muted);
   font-size: 12px;
   cursor: pointer;
@@ -433,7 +434,7 @@ pre.message {
   margin-top: 4px;
 }
 .period-select {
-  background: #0e0e12;
+  background: #020a14;
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
