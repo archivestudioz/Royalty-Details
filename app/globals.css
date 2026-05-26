@@ -401,6 +401,20 @@ pre.message {
   letter-spacing: 0.08em;
 }
 
+/* Clients add form */
+.client-form-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1.3fr auto;
+  gap: 8px;
+  align-items: center;
+}
+.client-form-row .booking-input { margin-top: 0; }
+.client-add-btn { white-space: nowrap; }
+@media (max-width: 720px) {
+  .client-form-row { grid-template-columns: 1fr; }
+  .client-add-btn { width: 100%; }
+}
+
 /* Analytics panels */
 .analytic-panels-grid {
   display: grid;

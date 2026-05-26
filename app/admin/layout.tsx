@@ -22,6 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <AdminSidebarLink href="/admin/analytics" label="Analytics" />
           <AdminSidebarLink href="/admin/schedule" label="Schedule" />
           <AdminSidebarLink href="/admin/submissions" label="Submissions" />
+          <AdminSidebarLink href="/admin/clients" label="Clients" />
         </nav>
 
         <div className="admin-user">
