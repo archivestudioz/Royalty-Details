@@ -62,6 +62,7 @@ export async function createBooking(input: {
   durationMin?: number;
   notes?: string;
   submissionId?: number;
+  amountCents?: number | null;
 }) {
   const s = await requireUser();
   const name = input.customerName.trim();
@@ -70,6 +71,11 @@ export async function createBooking(input: {
   const start = new Date(input.startAt);
   if (Number.isNaN(start.getTime())) throw new Error("Invalid start time");
   await ensureSlotFree(start);
+
+  const amount =
+    input.amountCents != null && Number.isFinite(input.amountCents) && input.amountCents >= 0
+      ? Math.round(input.amountCents)
+      : null;
 
   const geo = await lookupAddress(input.location);
 
@@ -86,9 +92,11 @@ export async function createBooking(input: {
     travelMinutes: geo?.travelMinutes ?? null,
     notes: input.notes?.trim() || null,
     submissionId: input.submissionId ?? null,
+    amountCents: amount,
     createdBy: Number(s.sub),
   });
   revalidatePath("/admin/schedule");
+  revalidatePath("/admin/analytics");
 }
 
 export async function bookFromSubmission(submissionId: number, startAtISO: string) {

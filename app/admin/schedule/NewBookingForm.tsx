@@ -41,6 +41,8 @@ export function NewBookingForm({
             try {
               const startLocal = String(fd.get("startAtLocal") ?? "");
               const startISO = new Date(startLocal).toISOString();
+              const rawAmount = String(fd.get("amount") ?? "").trim().replace(/^\$/, "").replace(/,/g, "");
+              const amountCents = rawAmount === "" ? null : Math.round(Number(rawAmount) * 100);
               await createBooking({
                 customerName: String(fd.get("customerName") ?? ""),
                 phone: String(fd.get("phone") ?? "") || undefined,
@@ -49,6 +51,7 @@ export function NewBookingForm({
                 durationMin: Number(fd.get("durationMin") ?? 60),
                 startAt: startISO,
                 notes: String(fd.get("notes") ?? "") || undefined,
+                amountCents,
               });
               onClose();
             } catch (err) {
@@ -99,6 +102,15 @@ export function NewBookingForm({
             <input name="durationMin" type="number" defaultValue={60} min={15} step={15} required className="booking-input" />
           </Field>
         </div>
+        <Field label="Amount ($) — adds to revenue">
+          <input
+            name="amount"
+            type="text"
+            inputMode="decimal"
+            placeholder="0"
+            className="booking-input"
+          />
+        </Field>
         <Field label="Notes">
           <textarea name="notes" rows={2} className="booking-input booking-textarea" />
         </Field>

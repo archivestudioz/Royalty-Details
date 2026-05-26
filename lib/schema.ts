@@ -43,6 +43,7 @@ export const bookings = pgTable("bookings", {
   travelMinutes: integer("travel_minutes"),
   submissionId: integer("submission_id"),
   notes: text("notes"),
+  amountCents: integer("amount_cents"),
   createdBy: integer("created_by"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });

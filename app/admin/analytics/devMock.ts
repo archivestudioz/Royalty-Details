@@ -93,6 +93,38 @@ export function devMockRevenueRows(now: Date) {
   return rows;
 }
 
+export function devMockBookingRevenueRows(now: Date) {
+  const rnd = seededRandom(91);
+  const rows: { day: string; totalCents: number; jobs: number; service: string | null }[] = [];
+
+  for (let i = 0; i < 150; i++) {
+    const d = new Date(now.getTime() - i * DAY_MS);
+    const dayKey = d.toISOString().slice(0, 10);
+    const dayOfWeek = d.getUTCDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    // Scheduled jobs are sparser than leads — ~0-2 per day
+    const baseJobs = (isWeekend ? 1.3 : 0.7);
+    const totalJobs = Math.max(0, Math.round(baseJobs + rnd() * 1.4 - 0.6));
+    if (totalJobs === 0) continue;
+
+    const buckets = new Map<string, { totalCents: number; jobs: number }>();
+    for (let k = 0; k < totalJobs; k++) {
+      const service = SERVICES[Math.floor(rnd() * SERVICES.length)];
+      const ticket = SERVICE_TICKETS[service] ?? 20000;
+      const variance = 1 + (rnd() - 0.5) * 0.3;
+      const cents = Math.round(ticket * variance);
+      const cur = buckets.get(service) ?? { totalCents: 0, jobs: 0 };
+      cur.totalCents += cents;
+      cur.jobs += 1;
+      buckets.set(service, cur);
+    }
+    for (const [service, agg] of buckets) {
+      rows.push({ day: dayKey, totalCents: agg.totalCents, jobs: agg.jobs, service });
+    }
+  }
+  return rows;
+}
+
 export function devMockSourceRows() {
   return [
     { utmSource: "google", referrer: null, count: 38 },

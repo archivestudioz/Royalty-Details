@@ -1,7 +1,7 @@
 import { db, DEV_NO_DB } from "@/lib/db";
-import { submissions } from "@/lib/schema";
+import { submissions, bookings } from "@/lib/schema";
 import { gte, sql, isNotNull, and } from "drizzle-orm";
-import { devMockDailyRows, devMockSourceRows, devMockRevenueRows } from "./devMock";
+import { devMockDailyRows, devMockSourceRows, devMockRevenueRows, devMockBookingRevenueRows } from "./devMock";
 import {
   SubmissionsPanel,
   RevenuePanel,
@@ -90,11 +90,25 @@ export default async function AnalyticsPage() {
         .where(and(gte(submissions.createdAt, since), isNotNull(submissions.amountCents)))
         .groupBy(sql`date_trunc('day', ${submissions.createdAt})`, submissions.service);
 
+  // Booking revenue — priced jobs scheduled on the calendar (keyed by start date)
+  const bookingRevenueRows = DEV_NO_DB
+    ? devMockBookingRevenueRows(now)
+    : await db
+        .select({
+          day: sql<string>`to_char(date_trunc('day', ${bookings.startAt}), 'YYYY-MM-DD')`,
+          totalCents: sql<number>`coalesce(sum(${bookings.amountCents}), 0)::int`,
+          jobs: sql<number>`count(${bookings.amountCents})::int`,
+          service: bookings.serviceType,
+        })
+        .from(bookings)
+        .where(and(gte(bookings.startAt, since), isNotNull(bookings.amountCents)))
+        .groupBy(sql`date_trunc('day', ${bookings.startAt})`, bookings.serviceType);
+
   const revenueByDay = new Map<string, number>();
   const jobsByDay = new Map<string, number>();
   const revenueByService = new Map<string, number>();
   let totalCents = 0;
-  for (const r of revenueRows) {
+  for (const r of [...revenueRows, ...bookingRevenueRows]) {
     revenueByDay.set(r.day, (revenueByDay.get(r.day) ?? 0) + r.totalCents);
     jobsByDay.set(r.day, (jobsByDay.get(r.day) ?? 0) + r.jobs);
     const s = r.service ?? "Unspecified";
