@@ -7,7 +7,11 @@ const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 const GATE_TTL_SECONDS = 60 * 60 * 24 * 30;
 
 function secret() {
-  const s = process.env.SESSION_SECRET;
+  const s =
+    process.env.SESSION_SECRET ||
+    (process.env.NODE_ENV !== "production"
+      ? "dev-only-insecure-session-secret-do-not-use-in-prod"
+      : null);
   if (!s) throw new Error("SESSION_SECRET is not set");
   return new TextEncoder().encode(s);
 }

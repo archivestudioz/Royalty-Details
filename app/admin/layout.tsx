@@ -9,65 +9,31 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await readSession();
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <aside
-        style={{
-          width: 240,
-          flexShrink: 0,
-          borderRight: "1px solid var(--border)",
-          background: "var(--panel)",
-          padding: "28px 18px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 24,
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-        }}
-      >
-        <div>
-          <Link href="/admin" style={{ color: "var(--gold)", fontWeight: 800, letterSpacing: "0.18em", fontSize: 14 }}>
-            ROYALTY <span style={{ color: "var(--text)" }}>DETAILS</span>
-          </Link>
-          <div className="muted" style={{ fontSize: 11, marginTop: 4, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-            Admin
+    <div className="admin-shell">
+      <aside className="admin-sidebar">
+        <Link href="/admin" className="admin-brand-block">
+          <div className="admin-brand">
+            ROYALTY <span className="admin-brand-alt">DETAILS</span>
           </div>
-        </div>
+          <div className="admin-tag">Admin</div>
+        </Link>
 
-        <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
+        <nav className="admin-nav">
           <AdminSidebarLink href="/admin/analytics" label="Analytics" />
           <AdminSidebarLink href="/admin/schedule" label="Schedule" />
           <AdminSidebarLink href="/admin/submissions" label="Submissions" />
+          <AdminSidebarLink href="/admin/clients" label="Clients" />
         </nav>
 
-        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
-          <div className="muted" style={{ fontSize: 12, marginBottom: 8, wordBreak: "break-all" }}>
-            {session?.email}
-          </div>
+        <div className="admin-user">
+          {session?.email ? <div className="admin-user-email">{session.email}</div> : null}
           <form action={signOut}>
-            <button
-              type="submit"
-              style={{
-                width: "100%",
-                background: "transparent",
-                color: "var(--gold)",
-                border: "1px solid var(--border)",
-                borderRadius: 8,
-                padding: "8px 10px",
-                fontSize: 12,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Sign out
-            </button>
+            <button type="submit" className="admin-signout">Sign out</button>
           </form>
         </div>
       </aside>
 
-      <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+      <div className="admin-content">{children}</div>
     </div>
   );
 }

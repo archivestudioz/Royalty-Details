@@ -4,8 +4,11 @@
   --bg: #050505;
   --bg-2: #0d0d0d;
   --bg-3: #141414;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.18);
+  --navy: #0c1f3a;
+  --navy-2: #103057;
+  --navy-soft: rgba(46, 95, 168, 0.10);
+  --line: rgba(86, 134, 204, 0.12);
+  --line-strong: rgba(96, 144, 210, 0.26);
   --text: #f5f5f5;
   --muted: #9a9a9a;
   --gold: #d4af37;
@@ -325,6 +328,7 @@ p { margin: 0 0 16px; color: var(--muted); }
 .service-card:hover {
   border-color: var(--line-strong);
   transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(16, 48, 87, 0.35);
 }
 .service-card:hover::before { transform: translateX(0); }
 .service-card h3 { color: #fff; margin-bottom: 12px; }
@@ -396,7 +400,7 @@ p { margin: 0 0 16px; color: var(--muted); }
 }
 .trust-card {
   padding: 36px 28px;
-  border-left: 1px solid var(--line);
+  border-left: 2px solid var(--navy-2);
 }
 .trust-num {
   font-family: 'Playfair Display', serif;
@@ -524,7 +528,7 @@ p { margin: 0 0 16px; color: var(--muted); }
   border-radius: var(--radius);
   transition: border-color 0.25s var(--ease), transform 0.25s var(--ease);
 }
-.booking-info-card:hover { border-color: var(--line-strong); transform: translateY(-3px); }
+.booking-info-card:hover { border-color: var(--line-strong); transform: translateY(-3px); box-shadow: 0 14px 40px rgba(16, 48, 87, 0.35); }
 .booking-info-card h3 { color: #fff; margin-bottom: 12px; }
 .booking-info-card p { font-size: 14px; margin: 0; }
 
@@ -674,10 +678,11 @@ p { margin: 0 0 16px; color: var(--muted); }
 /* ---------- CTA band ---------- */
 .cta-band {
   background:
-    linear-gradient(135deg, rgba(212, 175, 55, 0.08), transparent 60%),
-    var(--bg);
+    linear-gradient(135deg, rgba(212, 175, 55, 0.10), transparent 55%),
+    linear-gradient(180deg, var(--navy-2) 0%, var(--navy) 100%);
   padding: 100px 0;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
 }
 .cta-band-inner {
   display: flex;
@@ -692,8 +697,8 @@ p { margin: 0 0 16px; color: var(--muted); }
 
 /* ---------- Footer ---------- */
 .site-footer {
-  background: #020202;
-  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--navy) 0%, #081730 100%);
+  border-top: 1px solid var(--line-strong);
   padding: 80px 0 28px;
 }
 .footer-grid {

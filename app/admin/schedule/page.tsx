@@ -1,8 +1,9 @@
-import { db } from "@/lib/db";
+import { db, DEV_NO_DB } from "@/lib/db";
 import { bookings, submissions } from "@/lib/schema";
 import { and, gte, lt, isNull, notInArray, desc } from "drizzle-orm";
 import { Calendar } from "./Calendar";
 import { blockHours } from "@/lib/maps";
+import { devMockBookings, devMockUnscheduled } from "./devMock";
 
 export const dynamic = "force-dynamic";
 
@@ -62,27 +63,35 @@ export default async function SchedulePage({
 
       <Calendar
         weekStartISO={weekStart.toISOString()}
-        bookings={weekBookings.map((b) => ({
-          id: b.id,
-          customerName: b.customerName,
-          phone: b.phone,
-          location: b.location,
-          serviceType: b.serviceType,
-          startAtISO: b.startAt.toISOString(),
-          durationMin: b.durationMin,
-          status: b.status,
-          travelMinutes: b.travelMinutes,
-          blockHours: blockHours(b.durationMin, b.travelMinutes),
-        }))}
-        unscheduled={unscheduled.map((s) => ({
-          id: s.id,
-          name: s.name,
-          phone: s.phone,
-          email: s.email,
-          service: s.service,
-          message: s.message,
-          createdAtISO: s.createdAt.toISOString(),
-        }))}
+        bookings={
+          DEV_NO_DB
+            ? devMockBookings(weekStart)
+            : weekBookings.map((b) => ({
+                id: b.id,
+                customerName: b.customerName,
+                phone: b.phone,
+                location: b.location,
+                serviceType: b.serviceType,
+                startAtISO: b.startAt.toISOString(),
+                durationMin: b.durationMin,
+                status: b.status,
+                travelMinutes: b.travelMinutes,
+                blockHours: blockHours(b.durationMin, b.travelMinutes),
+              }))
+        }
+        unscheduled={
+          DEV_NO_DB
+            ? devMockUnscheduled()
+            : unscheduled.map((s) => ({
+                id: s.id,
+                name: s.name,
+                phone: s.phone,
+                email: s.email,
+                service: s.service,
+                message: s.message,
+                createdAtISO: s.createdAt.toISOString(),
+              }))
+        }
       />
     </main>
   );

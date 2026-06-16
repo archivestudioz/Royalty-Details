@@ -16,6 +16,7 @@ export const submissions = pgTable("submissions", {
   landingPath: text("landing_path"),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
+  amountCents: integer("amount_cents"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -42,7 +43,16 @@ export const bookings = pgTable("bookings", {
   travelMinutes: integer("travel_minutes"),
   submissionId: integer("submission_id"),
   notes: text("notes"),
+  amountCents: integer("amount_cents"),
   createdBy: integer("created_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const clients = pgTable("clients", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  email: text("email"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -51,3 +61,5 @@ export type NewSubmission = typeof submissions.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
+export type Client = typeof clients.$inferSelect;
+export type NewClient = typeof clients.$inferInsert;

@@ -5,7 +5,11 @@ const SESSION_COOKIE = "rd_session";
 const GATE_COOKIE = "rd_gate";
 
 function secret() {
-  const s = process.env.SESSION_SECRET;
+  const s =
+    process.env.SESSION_SECRET ||
+    (process.env.NODE_ENV !== "production"
+      ? "dev-only-insecure-session-secret-do-not-use-in-prod"
+      : null);
   if (!s) throw new Error("SESSION_SECRET is not set");
   return new TextEncoder().encode(s);
 }

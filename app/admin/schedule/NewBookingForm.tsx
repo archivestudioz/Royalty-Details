@@ -3,6 +3,15 @@
 import { useState, useTransition } from "react";
 import { createBooking } from "../actions/bookings";
 
+const SERVICE_OPTIONS = [
+  "Maintenance Wash",
+  "Interior Detail",
+  "Exterior Detail",
+  "Full Detail",
+  "Paint Correction",
+  "Ceramic Coating",
+];
+
 export function NewBookingForm({
   defaultStartISO,
   onClose,
@@ -12,22 +21,18 @@ export function NewBookingForm({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [services, setServices] = useState<string[]>([]);
 
   const defaultLocal = toLocalDatetime(defaultStartISO);
 
+  function toggleService(name: string) {
+    setServices((prev) =>
+      prev.includes(name) ? prev.filter((s) => s !== name) : [...prev, name]
+    );
+  }
+
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.6)",
-        display: "grid",
-        placeItems: "center",
-        zIndex: 50,
-        padding: 16,
-      }}
-    >
+    <div onClick={onClose} className="booking-modal">
       <form
         onClick={(e) => e.stopPropagation()}
         action={(fd) => {
@@ -36,6 +41,8 @@ export function NewBookingForm({
             try {
               const startLocal = String(fd.get("startAtLocal") ?? "");
               const startISO = new Date(startLocal).toISOString();
+              const rawAmount = String(fd.get("amount") ?? "").trim().replace(/^\$/, "").replace(/,/g, "");
+              const amountCents = rawAmount === "" ? null : Math.round(Number(rawAmount) * 100);
               await createBooking({
                 customerName: String(fd.get("customerName") ?? ""),
                 phone: String(fd.get("phone") ?? "") || undefined,
@@ -44,6 +51,7 @@ export function NewBookingForm({
                 durationMin: Number(fd.get("durationMin") ?? 60),
                 startAt: startISO,
                 notes: String(fd.get("notes") ?? "") || undefined,
+                amountCents,
               });
               onClose();
             } catch (err) {
@@ -51,44 +59,60 @@ export function NewBookingForm({
             }
           });
         }}
-        className="card"
-        style={{ width: "100%", maxWidth: 460, padding: 24 }}
+        className="card booking-form"
       >
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+        <div className="booking-form-header">
           <strong style={{ fontSize: 16 }}>New booking</strong>
-          <button type="button" onClick={onClose} style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 18, cursor: "pointer" }}>×</button>
+          <button type="button" onClick={onClose} className="booking-close" aria-label="Close">×</button>
         </div>
 
         <Field label="Customer name *">
-          <input name="customerName" required style={input} autoFocus />
+          <input name="customerName" required className="booking-input" autoFocus />
         </Field>
         <Field label="Phone">
-          <input name="phone" type="tel" style={input} />
+          <input name="phone" type="tel" className="booking-input" />
         </Field>
         <Field label="Location / address">
-          <input name="location" style={input} placeholder="123 Main St, Newark" />
+          <input name="location" className="booking-input" placeholder="123 Main St, Newark" />
         </Field>
-        <Field label="Job type">
-          <input name="serviceType" list="service-types" style={input} placeholder="e.g. Full Detail" />
-          <datalist id="service-types">
-            <option value="Maintenance Wash" />
-            <option value="Interior Detail" />
-            <option value="Exterior Detail" />
-            <option value="Full Detail" />
-            <option value="Paint Correction" />
-            <option value="Ceramic Coating" />
-          </datalist>
+        <Field label="Job type (select all that apply)">
+          <div className="service-checklist">
+            {SERVICE_OPTIONS.map((name) => {
+              const checked = services.includes(name);
+              return (
+                <label key={name} className={checked ? "service-chip service-chip--on" : "service-chip"}>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleService(name)}
+                    className="service-chip-input"
+                  />
+                  <span>{name}</span>
+                </label>
+              );
+            })}
+          </div>
+          <input type="hidden" name="serviceType" value={services.join(", ")} />
         </Field>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 110px", gap: 10 }}>
+        <div className="booking-row">
           <Field label="Date & time">
-            <input name="startAtLocal" type="datetime-local" defaultValue={defaultLocal} required style={input} />
+            <input name="startAtLocal" type="datetime-local" defaultValue={defaultLocal} required className="booking-input" />
           </Field>
           <Field label="Duration (min)">
-            <input name="durationMin" type="number" defaultValue={60} min={15} step={15} required style={input} />
+            <input name="durationMin" type="number" defaultValue={60} min={15} step={15} required className="booking-input" />
           </Field>
         </div>
+        <Field label="Amount ($) — adds to revenue">
+          <input
+            name="amount"
+            type="text"
+            inputMode="decimal"
+            placeholder="0"
+            className="booking-input"
+          />
+        </Field>
         <Field label="Notes">
-          <textarea name="notes" rows={2} style={{ ...input, resize: "vertical" }} />
+          <textarea name="notes" rows={2} className="booking-input booking-textarea" />
         </Field>
 
         {error ? <div style={{ color: "#ff8a8a", fontSize: 13, marginBottom: 10 }}>{error}</div> : null}
@@ -109,17 +133,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </label>
   );
 }
-
-const input: React.CSSProperties = {
-  width: "100%",
-  padding: "8px 10px",
-  borderRadius: 6,
-  border: "1px solid var(--border)",
-  background: "#0e0e12",
-  color: "var(--text)",
-  fontSize: 14,
-  marginTop: 4,
-};
 
 function toLocalDatetime(iso: string) {
   const d = new Date(iso);
