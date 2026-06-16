@@ -2,7 +2,9 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
 const COOKIE_NAME = "rd_session";
+const GATE_COOKIE = "rd_gate";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+const GATE_TTL_SECONDS = 60 * 60 * 24 * 30;
 
 function secret() {
   const s = process.env.SESSION_SECRET;
@@ -57,4 +59,21 @@ export async function verifyToken(token: string): Promise<boolean> {
   }
 }
 
+export async function createGateSession() {
+  const token = await new SignJWT({ gate: true })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(`${GATE_TTL_SECONDS}s`)
+    .sign(secret());
+
+  (await cookies()).set(GATE_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: GATE_TTL_SECONDS,
+  });
+}
+
 export const SESSION_COOKIE = COOKIE_NAME;
+export const GATE_COOKIE_NAME = GATE_COOKIE;
